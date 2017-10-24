@@ -1,30 +1,9 @@
 from dateutil.parser import parse
 from openpyxl import Workbook
 from openpyxl import load_workbook
+import sys
+import argparse
 
-
-strs = [
-    "10 Dec Interac purchase - 0644 KABOB HUT 7.89 1,415.33",
-    "14 Dec Interac purchase - 3342 KABOB HUT 7.89",
-    "Interac purchase - 6243 SUBWAY # 2969 8.76 1,398.68",
-    "15 Dec Interac purchase - 2953 UW BRUBAKERS SL 6.22 1,392.46",
-    "23 Dec Online Banking payment - 8933",
-    "BELL CANADA 69.87 1,247.28"
-]
-
-strs2 = [
-    "AUG 11 AUG 12 MCDONALD'S #8975 TORONTO ON",
-    "7.40645E+22",
-    "$1.46",
-    "SEP 01 SEP 01 ANNUAL FEE $39.00",
-    "SEP 01 SEP 01 ANNUAL FEE REBATE -$39.00",
-    "SEP 02 SEP 06 FOOD BASICS #654 WATERLOO ON",
-    "7.453E+22",
-    "$52.38",
-    "SEP 04 SEP 06 TIM HORTONS 0770 QTH CAMBRIDGE ON",
-    "7.47034E+22",
-    "$7.20",
-]
 
 def is_date(string):
     try:
@@ -102,7 +81,7 @@ def parse_excel(l):
             i+=1
 
 
-def excel(verbose=False):
+def excel(wb_path, verbose=False):
     headers = ['Date', 'Description', 'Price']
 
     wb = load_workbook('files/2016.xlsx')
@@ -144,8 +123,15 @@ def excel(verbose=False):
         i+=1
     wb.save('files/2016.xlsx')
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Parse rbc statements')
+    parser.add_argument('wb_path', action="store")
+    parser.add_argument('-v', help='verbose',default=False, dest='verbose', action="store_true")
+    options = parser.parse_args()
+    excel(**vars(options))
 
-excel()
+#'files/2016.xlsx'
+# excel()
 #parse_excel(strs2)
 #extract(strs[:3])
 
