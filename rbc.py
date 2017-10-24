@@ -102,35 +102,47 @@ def parse_excel(l):
             i+=1
 
 
-def excel():
+def excel(verbose=False):
     headers = ['Date', 'Description', 'Price']
 
     wb = load_workbook('files/2016.xlsx')
     ws = wb['2016']
 
+    out_ws = wb.create_sheet(title='2016 - Visa')
+    out_ws['A1'].value = headers[0]
+    out_ws['B1'].value = headers[1]
+    out_ws['C1'].value = headers[2]
+
     i = 1
+    row = 2
     while i<ws.max_row:
         words = ws.cell(column=1,row=i).value.split()
         if is_date(words[0]):
             date = ' '.join(words[:2])
             if words[-1][0] == '$' or words[-1][0] == '-': # if 1 liner
                 price = words[-1]
-                location =  ' '.join(words[4:-1])
+                description =  ' '.join(words[4:-1])
             else:
-                location =  ' '.join(words[4:])
+                description =  ' '.join(words[4:])
                 i+=2
                 price = ws.cell(column=1,row=i).value
-
-            print("data: {}, location: {}, price: {}".format(
-                  date,location, price))
         elif words[0] == 'NEW':
-            location = "NEW BALANCE"
+            description = "NEW BALANCE"
+            date = ""
             price = words[-1]
-            print("data: {}, location: {}, price: {}".format(
-                date, location, price))
         else:
             print("error", ws.cell(column=1,row=i).value)
+            i+=1
+            continue
+        if verbose:
+            print("data: {}, description: {}, price: {}".format(
+                date, description, price))
+        out_ws.cell(column=1, row=row).value = date
+        out_ws.cell(column=2, row=row).value = description
+        out_ws.cell(column=3, row=row).value = price
+        row+=1
         i+=1
+    wb.save('files/2016.xlsx')
 
 
 excel()
