@@ -3,6 +3,7 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 import sys
 import argparse
+import os
 
 
 def is_date(string):
@@ -118,17 +119,17 @@ def  _parse_worksheet(in_ws, out_ws, verbose):
         i += 1
 
 
-def excel(wb_path, verbose=False, prompt=False):
+def excel(wb_path, prefix='rbc-parser-', new=False, verbose=False, confirm=False):
     headers = ['Date', 'Description', 'Price']
 
     wb = load_workbook(wb_path)
     for ws in wb.worksheets:
         if ws.title.startswith("rbc-parser"):
             continue
-        if prompt:
+        if confirm:
             resp = input("parse <{}> ?".format(ws.title))
             if resp.lower() == 'y' or resp.lower() == 'yes':
-                out_name = "rbc-parser-" + ws.title
+                out_name = prefix + ws.title
                 out_ws = wb.create_sheet(title=out_name)
                 out_ws['A1'].value = headers[0]
                 out_ws['B1'].value = headers[1]
@@ -137,25 +138,30 @@ def excel(wb_path, verbose=False, prompt=False):
                 print()
             else:
                 continue
-    wb.save(wb_path)
-
-
+    if new:
+        wb_path = os.path.join(os.path.dirname(wb_path), prefix+os.path.basename(wb_path))
+        wb.save(wb_path)
+        print
+    else:
+        wb.save(wb_path)
+    print("saved workbook at {}".format(wb_path))
 
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Parse rbc statements')
+    parser = argparse.ArgumentParser(description='Parse rbc statements', epilog='not affiliated w/ rbc')
     parser.add_argument('wb_path', action="store", help="path to the excel workbook")
-    parser.add_argument('-v', help='verbose',default=False, dest='verbose', action="store_true")
-    parser.add_argument('-p', help='prompt', default=False, dest='prompt', action="store_true")
+    parser.add_argument('-v', '--verbose', help='verbose',default=False, dest='verbose', action="store_true")
+    parser.add_argument('-c', '--confirmation' , help='asks for confirmation before parsing worksheet if true',
+                        default=False, dest='confirm', action="store_true")
+    parser.add_argument('-p', '--prefix', help='assign prefix for wb/ws names', default='rbc-parser-',
+                        dest='prefix', action='store')
+    parser.add_argument('-n', '--new', help='create new workbook instead of saving existing one', default=False, dest='new',
+                        action="store_true")
+
 
     options = parser.parse_args()
     excel(**vars(options))
-
-#'files/2016.xlsx'
-# excel()
-#parse_excel(strs2)
-#extract(strs[:3])
 
 
 
