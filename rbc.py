@@ -56,7 +56,7 @@ def extract(strs):
         print(balance,withdrawals,desc)
 
 
-def _____parse_excel(l):
+def ___parse_excel(l):
     i = 0
     while i<len(l):
         words = l[i].split()
@@ -121,7 +121,6 @@ def  _parse_worksheet(in_ws, out_ws, verbose):
 
 def excel(wb_path, prefix='rbc-parser-', new=False, verbose=False, confirm=False):
     headers = ['Date', 'Description', 'Price']
-
     wb = load_workbook(wb_path)
     for ws in wb.worksheets:
         if ws.title.startswith("rbc-parser"):
@@ -135,9 +134,15 @@ def excel(wb_path, prefix='rbc-parser-', new=False, verbose=False, confirm=False
                 out_ws['B1'].value = headers[1]
                 out_ws['C1'].value = headers[2]
                 _parse_worksheet(ws,out_ws,verbose)
-                print()
             else:
                 continue
+        else:
+            out_name = prefix + ws.title
+            out_ws = wb.create_sheet(title=out_name)
+            out_ws['A1'].value = headers[0]
+            out_ws['B1'].value = headers[1]
+            out_ws['C1'].value = headers[2]
+            _parse_worksheet(ws, out_ws, verbose)
     if new:
         wb_path = os.path.join(os.path.dirname(wb_path), prefix+os.path.basename(wb_path))
         wb.save(wb_path)
